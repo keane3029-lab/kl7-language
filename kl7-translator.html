@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KL7 — Doodle Cipher</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f6f1e4;
+    --paper-dark:#0f1720;
+    --ink:#2a3550;
+    --ink-dark:#dfe4f2;
+    --line-blue:#9fb3d8;
+    --line-blue-dark:#3a4a6b;
+    --line-red:#c65d54;
+    --pencil:#6b6558;
+    --pencil-dark:#9a9484;
+    --accent:#c65d54;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:var(--paper-dark);
+      --ink:var(--ink-dark);
+      --line-blue:var(--line-blue-dark);
+      --pencil:var(--pencil-dark);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:var(--paper-dark);
+    --ink:var(--ink-dark);
+    --line-blue:var(--line-blue-dark);
+    --pencil:var(--pencil-dark);
+  }
+  *{margin:0;box-sizing:border-box;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Patrick Hand', sans-serif;
+    min-height:100%;
+    line-height:1.5;
+  }
+  .page{
+    max-width:640px;
+    margin:0 auto;
+    padding:28px 22px 60px;
+    background-image:
+      linear-gradient(var(--line-blue) 1px, transparent 1px);
+    background-size:100% 34px;
+    background-position:0 92px;
+    position:relative;
+  }
+  .margin-rule{
+    position:absolute;
+    top:0; bottom:0; left:52px;
+    width:1px;
+    background:var(--line-red);
+    opacity:.55;
+  }
+  header{padding-left:18px; position:relative;}
+  h1{
+    font-family:'Kalam', cursive;
+    font-weight:700;
+    font-size:2.1rem;
+    letter-spacing:.5px;
+  }
+  .tag{color:var(--pencil); font-size:1rem; margin-top:2px;}
+  .origin{
+    margin:22px 0 22px 18px;
+    padding:12px 14px;
+    border:1.5px dashed var(--pencil);
+    border-radius:2px;
+    font-size:1.05rem;
+    color:var(--ink);
+    max-width:78ch;
+  }
+  .origin b{font-family:'Kalam',cursive;}
+  section{padding-left:18px; margin-top:26px;}
+  h2{
+    font-family:'Kalam', cursive;
+    font-size:1.4rem;
+    margin-bottom:10px;
+  }
+  textarea{
+    width:100%;
+    font-family:'Patrick Hand', sans-serif;
+    font-size:1.15rem;
+    color:var(--ink);
+    background:transparent;
+    border:none;
+    border-bottom:2px solid var(--pencil);
+    resize:none;
+    padding:6px 2px;
+    outline:none;
+  }
+  textarea:focus{border-bottom-color:var(--accent);}
+  .output{
+    margin-top:16px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px 8px;
+    min-height:56px;
+  }
+  .glyph{
+    width:46px; height:46px;
+    border:1.5px solid var(--ink);
+    border-radius:4px;
+    display:flex; align-items:center; justify-content:center;
+    background:transparent;
+    flex-shrink:0;
+  }
+  .glyph svg{width:30px;height:30px;stroke:var(--ink);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;}
+  .glyph.space{border:none; width:14px;}
+  .glyph.tbd{border-style:dashed; color:var(--pencil); font-family:'Kalam',cursive; font-size:1.1rem;}
+  .alphabet{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(78px,1fr));
+    gap:14px 10px;
+    margin-top:14px;
+  }
+  .cell{text-align:center;}
+  .cell .glyph{margin:0 auto 4px; width:44px; height:44px;}
+  .cell .letter{font-family:'Kalam',cursive; font-size:1rem; color:var(--pencil);}
+  .note{
+    margin-top:24px; padding-left:18px;
+    font-size:.95rem; color:var(--pencil);
+    max-width:70ch;
+  }
+  ::selection{background:var(--accent); color:var(--paper);}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="margin-rule"></div>
+  <header>
+    <h1>KL7 <span style="font-weight:400;">— doodle cipher</span></h1>
+    <div class="tag">a Keane × Sky collab · page 1, in progress</div>
+  </header>
+
+  <div class="origin">
+    <b>how it started:</b> Keane asked Sky to build a language together. Sky's first move was "just draw whatever, nonsense" — Keane pushed for something typeable instead, so they landed on doodles with rules: one small symbol per letter.
+  </div>
+
+  <section>
+    <h2>translate</h2>
+    <textarea id="input" rows="2" placeholder="type something…"></textarea>
+    <div class="output" id="output"></div>
+  </section>
+
+  <section>
+    <h2>alphabet so far</h2>
+    <div class="alphabet" id="alphabet"></div>
+  </section>
+
+  <p class="note">Letters shown dashed haven't been drawn yet on the paper — Keane's still filling them in. Symbols here are Claude's best-effort redraw from a photo of the notebook page, not scans of the originals, so if any look off, they're easy to fix.</p>
+</div>
+
+<script>
+// stroke-based doodle approximations, viewBox 0 0 24 24
+const GLYPHS = {
+  A: '<path d="M12 4 L12 20"/>',
+  B: '<rect x="6" y="6" width="12" height="12" rx="1"/><path d="M6 6 L18 18 M18 6 L6 18"/>',
+  C: '<path d="M18 8 a6 6 0 1 0 0 8"/>',
+  D: '<path d="M5 16 L19 16"/><path d="M12 8 L19 16 L5 16 Z"/>',
+  E: '<path d="M6 6 L6 18 L18 18"/>',
+  F: '<path d="M6 7 L18 7 L12 19 Z"/>',
+  G: '<path d="M4 12 Q7 7 10 12 T16 12 T22 12" transform="translate(-2,0)"/>',
+  J: '<path d="M15 6 Q9 8 10 14 Q11 18 7 17"/>',
+  K: '<path d="M6 6 L18 18 M18 6 L6 18"/>',
+  L: '<path d="M12 5 L12 15 M12 19 L12 19.2"/>',
+  M: '<path d="M8 6 Q6 10 9 12 Q6 14 8 18 M11 6 L11 18" stroke-dasharray="0" /><path d="M8 6 a3 3 0 0 1 0 6 a3 3 0 0 1 0 6"/>',
+  O: '<rect x="5" y="9" width="14" height="6" rx="1"/>',
+  P: '<rect x="6" y="7" width="12" height="10" transform="skewX(-12)"/>',
+  R: '<path d="M7 20 L15 6 L18 6 L18 9 L9 20 Z"/>',
+  S: '<path d="M7 8 Q17 8 15 12 Q13 16 19 16" />',
+  T: '<path d="M5 8 L12 14 L19 8 M5 16 L12 10 L19 16" />',
+  U: '<path d="M9 5 L9 19 M15 5 L15 19 M9 12 L15 12"/>',
+  V: '<circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/>',
+  X: '<circle cx="12" cy="10" r="5"/><path d="M9.5 9.5 l1 1 M13.5 9.5 l1 1 M9 13 Q12 16 15 13"/>',
+  Y: '<path d="M6 8 L14 8 L18 14 L10 16 Z"/>',
+  Z: '<rect x="5" y="8" width="14" height="9"/><path d="M5 11 L19 11 M5 14 L19 14 M8 8 L8 17 M12 8 L12 17 M16 8 L16 17"/>'
+};
+
+const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+function glyphInner(letter){
+  return GLYPHS[letter] || null;
+}
+
+function makeGlyphEl(letter){
+  const g = document.createElement("div");
+  const inner = glyphInner(letter);
+  if(inner){
+    g.className = "glyph";
+    g.innerHTML = `<svg viewBox="0 0 24 24">${inner}</svg>`;
+  } else {
+    g.className = "glyph tbd";
+    g.textContent = "?";
+  }
+  return g;
+}
+
+// build alphabet reference
+const alphaWrap = document.getElementById("alphabet");
+ALPHABET.forEach(L=>{
+  const cell = document.createElement("div");
+  cell.className = "cell";
+  cell.appendChild(makeGlyphEl(L));
+  const label = document.createElement("div");
+  label.className = "letter";
+  label.textContent = L;
+  cell.appendChild(label);
+  alphaWrap.appendChild(cell);
+});
+
+// live translate
+const input = document.getElementById("input");
+const output = document.getElementById("output");
+function render(){
+  output.innerHTML = "";
+  const text = input.value.toUpperCase();
+  for(const ch of text){
+    if(ch === " "){
+      const sp = document.createElement("div");
+      sp.className = "glyph space";
+      output.appendChild(sp);
+      continue;
+    }
+    if(!/[A-Z]/.test(ch)) continue;
+    output.appendChild(makeGlyphEl(ch));
+  }
+}
+input.addEventListener("input", render);
+</script>
+</body>
+</html>
